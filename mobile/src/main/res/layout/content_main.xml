@@ -12,8 +12,61 @@
     tools:context="com.bangaloretalkies.iot.MainActivity"
     tools:showIn="@layout/app_bar_main">
 
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Light Control"
+        android:id="@+id/lightcontrolswitch1"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:checked="false" />
+
+    <SeekBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/seekBar"
+        android:layout_below="@+id/lightcontrolswitch1"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="149dp"
+        android:layout_alignEnd="@+id/lightcontrolswitch1" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/editTextPort"
+        android:layout_below="@+id/seekBar"
+        android:layout_marginTop="37dp"
+        android:layout_alignEnd="@+id/seekBar"
+        android:text="10000" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Port"
+        android:id="@+id/textViewPort"
+        android:layout_alignTop="@+id/editTextPort"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="IP"
+        android:id="@+id/textViewIp"
+        android:layout_below="@+id/editTextPort"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="32dp" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/editTextIp"
+        android:layout_alignBottom="@+id/textViewIp"
+        android:layout_alignStart="@+id/editTextPort"
+        android:layout_alignParentEnd="true"
+        android:text="127.0.0.1" />
 </RelativeLayout>
