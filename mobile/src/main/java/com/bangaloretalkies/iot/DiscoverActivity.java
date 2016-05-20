@@ -82,6 +82,7 @@ public class DiscoverActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.i(TAG, "onCreate.");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_discover);
 
@@ -90,7 +91,7 @@ public class DiscoverActivity extends AppCompatActivity {
         refreshButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Log.d(TAG, "Discover devices button clicked.");
-                // new MyTask().execute();
+                new MyTask().execute();
             }
         });
     }
