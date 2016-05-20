@@ -22,12 +22,16 @@ import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
 public class DiscoverActivity extends AppCompatActivity {
     private static final String TAG = "DiscoverActivity";
     private Button refreshButton;
     private ListView dicoverDevicesList;
+    String[] discoveredMachines;
+    List<String> discoveredMachinesList = new ArrayList<String>();
 
     private void sendDiscoverRequest(DatagramSocket socket) throws IOException {
         String data = String.format("discover");
@@ -109,6 +113,8 @@ public class DiscoverActivity extends AppCompatActivity {
                 Log.i(TAG, "ip: " + ip.toString());
                 Log.i(TAG, "port: " + port.toString());
 
+                discoveredMachinesList.add(ip.toString() + ":" + port.toString());
+
                 //String[] hosts = s.split(":");
                 //String[] host1params = hosts[0].split(":");
 
@@ -123,14 +129,6 @@ public class DiscoverActivity extends AppCompatActivity {
         } catch (SocketTimeoutException e) {
             Log.d(TAG, "Receive timed out");
         }
-        String[] values = new String[] { "Android List View" };
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, android.R.id.text1, values);
-
-
-        // Assign adapter to ListView
-        // dicoverDevicesList.setAdapter(adapter);
     }
 
     @Override
@@ -191,6 +189,29 @@ public class DiscoverActivity extends AppCompatActivity {
 
             return null;
         }
+    }
+
+    public void updateDevicesList (String port)
+    {
+        // dynamic_port = port;
+
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // This code will always run on the UI thread, therefore is safe to modify UI elements.
+
+//                ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+//                        android.R.layout.simple_list_item_1, android.R.id.text1, discoveredMachinesList);
+
+
+                // Assign adapter to ListView
+                // dicoverDevicesList.setAdapter(adapter);
+
+//                if (!editTextPort.getText().toString().equals(dynamic_port)) {
+//                    editTextPort.setText(dynamic_port);
+//                }
+            }
+        });
     }
 
 }

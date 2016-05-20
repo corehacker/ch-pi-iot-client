@@ -14,11 +14,18 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = "MainActivity";
+
+    private EditText editTextPort;
+    private EditText editTextIp;
+
+    private String dynamic_ip;
+    private String dynamic_port;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +43,9 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        editTextPort = (EditText) findViewById(R.id.editTextPort);
+        editTextIp = (EditText) findViewById(R.id.editTextIp);
     }
 
     @Override
@@ -87,5 +97,37 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public void updateIp (String ip)
+    {
+        dynamic_ip = ip;
+
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // This code will always run on the UI thread, therefore is safe to modify UI elements.
+
+                if (!editTextIp.getText().toString().equals(dynamic_ip)) {
+                    editTextIp.setText(dynamic_ip);
+                }
+            }
+        });
+    }
+
+    public void updatePort (String port)
+    {
+        dynamic_port = port;
+
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // This code will always run on the UI thread, therefore is safe to modify UI elements.
+
+                if (!editTextPort.getText().toString().equals(dynamic_port)) {
+                    editTextPort.setText(dynamic_port);
+                }
+            }
+        });
     }
 }
