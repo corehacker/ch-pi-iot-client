@@ -5,7 +5,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,6 +27,7 @@ import java.util.Enumeration;
 public class DiscoverActivity extends AppCompatActivity {
     private static final String TAG = "DiscoverActivity";
     private Button refreshButton;
+    private ListView dicoverDevicesList;
 
     private void sendDiscoverRequest(DatagramSocket socket) throws IOException {
         String data = String.format("discover");
@@ -118,6 +123,14 @@ public class DiscoverActivity extends AppCompatActivity {
         } catch (SocketTimeoutException e) {
             Log.d(TAG, "Receive timed out");
         }
+        String[] values = new String[] { "Android List View" };
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_1, android.R.id.text1, values);
+
+
+        // Assign adapter to ListView
+        // dicoverDevicesList.setAdapter(adapter);
     }
 
     @Override
@@ -133,6 +146,29 @@ public class DiscoverActivity extends AppCompatActivity {
                 Log.d(TAG, "Discover devices button clicked.");
                 new MyTask().execute();
             }
+        });
+
+        dicoverDevicesList = (ListView) findViewById(R.id.discoverdeviceslist);
+
+        dicoverDevicesList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view,
+                                    int position, long id) {
+
+                // ListView Clicked item index
+                int itemPosition     = position;
+
+                // ListView Clicked item value
+                String  itemValue    = (String) dicoverDevicesList.getItemAtPosition(position);
+
+                // Show Alert
+                Toast.makeText(getApplicationContext(),
+                        "Position :"+itemPosition+"  ListItem : " +itemValue , Toast.LENGTH_LONG)
+                        .show();
+
+            }
+
         });
     }
 
