@@ -3,6 +3,7 @@ package com.bangaloretalkies.iot;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -16,7 +17,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Switch;
+
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketTimeoutException;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -30,6 +39,74 @@ public class MainActivity extends AppCompatActivity
     private String dynamic_port;
 
     SharedPreferences sharedPref;
+    private static final int SERVER_PORT = 10000;
+    private static final int TIMEOUT_MS = 2500;
+    private int dynamic_timeout_ms;
+    private Integer dynamic_server_port;
+    private boolean isSwitchChecked = false;
+
+
+    private InetAddress getIpAddress() throws IOException {
+
+        return InetAddress.getByName(editTextIp.getText().toString());
+    }
+
+    private void sendOnRequest(DatagramSocket socket) throws IOException {
+        String data = String.format("on");
+        Log.d(TAG, "Sending data " + data);
+
+        if (null != editTextPort && null != editTextPort.getText()) {
+            Integer dsp = new Integer(editTextPort.getText().toString());
+            dynamic_server_port = dsp.intValue();
+            if (dynamic_server_port > 65535) {
+                dynamic_server_port = SERVER_PORT;
+                editTextPort.setText("10000");
+            }
+        }
+        else {
+            dynamic_server_port = SERVER_PORT;
+        }
+        DatagramPacket packet = new DatagramPacket(data.getBytes(), data.length(),
+                getIpAddress(), dynamic_server_port);
+        socket.send(packet);
+    }
+
+    private void sendOffRequest(DatagramSocket socket) throws IOException {
+        String data = String.format("off");
+        Log.d(TAG, "Sending data " + data);
+
+        if (null != editTextPort && null != editTextPort.getText()) {
+            Integer dsp = new Integer(editTextPort.getText().toString());
+            dynamic_server_port = dsp.intValue();
+            if (dynamic_server_port > 65535) {
+                dynamic_server_port = SERVER_PORT;
+                editTextPort.setText("10000");
+            }
+        }
+        else {
+            dynamic_server_port = SERVER_PORT;
+        }
+        DatagramPacket packet = new DatagramPacket(data.getBytes(), data.length(),
+                getIpAddress(), dynamic_server_port);
+        socket.send(packet);
+    }
+
+
+
+    private void listenForResponses(DatagramSocket socket) throws IOException {
+        byte[] buf = new byte[1024];
+        try {
+            while (true) {
+                DatagramPacket packet = new DatagramPacket(buf, buf.length);
+                socket.receive(packet);
+                String s = new String(packet.getData(), 0, packet.getLength());
+                Log.d(TAG, "Received response " + s);
+                break;
+            }
+        } catch (SocketTimeoutException e) {
+            Log.d(TAG, "Receive timed out");
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +134,18 @@ public class MainActivity extends AppCompatActivity
         editor.putString("selected-port", "8080");
         editor.commit();
 
+        Switch onOffSwitch = (Switch)  findViewById(R.id.lightcontrolswitch1);
+
+        onOffSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                Log.v("Switch State=", "" + isChecked);
+                isSwitchChecked = isChecked;
+                new MyTask().execute(isChecked);
+            }
+
+        });
     }
 
     @Override
@@ -171,4 +260,36 @@ public class MainActivity extends AppCompatActivity
 //            editTextPort.setText(dynamic_port);
 //        }
 //    }
+
+    public class MyTask extends AsyncTask<Boolean, Integer, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(Boolean... isChecked) {
+
+            try {
+                DatagramSocket socket = new DatagramSocket();
+                //socket.setBroadcast(true);
+                socket.setSoTimeout(TIMEOUT_MS);
+
+
+
+                if (isSwitchChecked)
+                {
+                    sendOnRequest(socket);
+                }
+                else
+                {
+                    sendOffRequest(socket);
+                }
+
+                listenForResponses(socket);
+
+                socket.close();
+            } catch (IOException e) {
+                Log.e(TAG, "Could not send discovery request", e);
+            }
+
+            return null;
+        }
+    }
 }
