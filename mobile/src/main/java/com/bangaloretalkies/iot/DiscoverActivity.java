@@ -1,5 +1,7 @@
 package com.bangaloretalkies.iot;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -39,6 +41,7 @@ public class DiscoverActivity extends AppCompatActivity {
     List<String> discoveredMachinesList = new ArrayList<String>();
     Set<String> discoveredMachinesSet = new LinkedHashSet<>();
     ArrayAdapter<String> adapter;
+    SharedPreferences sharedPref;
 
     private void sendDiscoverRequest(DatagramSocket socket) throws IOException {
         String data = String.format("discover");
@@ -197,11 +200,25 @@ public class DiscoverActivity extends AppCompatActivity {
                 // ListView Clicked item value
                 String  itemValue    = (String) dicoverDevicesList.getItemAtPosition(position);
 
+                Log.d (TAG, "Setting main activity ip and port");
                 // Show Alert
                 Toast.makeText(getApplicationContext(),
                         "Position: " + itemPosition + "  ListItem: " + itemValue , Toast.LENGTH_LONG)
                         .show();
 
+                // MainActivity mainActivity = (MainActivity) getParent();
+                String[] selectedHost = itemValue.split(":");
+                 //mainActivity.updateIpV2(selectedHost[0]);
+                 //mainActivity.updatePortV2(selectedHost[1]);
+                Log.d (TAG, "Setting main activity ip and port");
+                //MainActivity.editTextIp.setText(selectedHost[0]);
+               // MainActivity.editTextPort.setText(selectedHost[1]);
+
+                sharedPref = getSharedPreferences("iot-shared-pref", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putString("selected-ip", selectedHost[0]);
+                editor.putString("selected-port", selectedHost[1]);
+                editor.commit();
             }
 
         });
@@ -230,22 +247,12 @@ public class DiscoverActivity extends AppCompatActivity {
 
     public void updateDevicesList ()
     {
-        // dynamic_port = port;
-
         this.runOnUiThread(new Runnable() {
-
             @Override
             public void run() {
                 // This code will always run on the UI thread, therefore is safe to modify UI elements.
-
-
-
                 // Assign adapter to ListView
                 dicoverDevicesList.setAdapter(adapter);
-
-//                if (!editTextPort.getText().toString().equals(dynamic_port)) {
-//                    editTextPort.setText(dynamic_port);
-//                }
             }
         });
     }

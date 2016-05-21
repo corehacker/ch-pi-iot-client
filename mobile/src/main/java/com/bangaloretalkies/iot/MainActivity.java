@@ -1,6 +1,8 @@
 package com.bangaloretalkies.iot;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -27,6 +29,8 @@ public class MainActivity extends AppCompatActivity
     private String dynamic_ip;
     private String dynamic_port;
 
+    SharedPreferences sharedPref;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "onCreate.");
@@ -46,6 +50,25 @@ public class MainActivity extends AppCompatActivity
 
         editTextPort = (EditText) findViewById(R.id.editTextPort);
         editTextIp = (EditText) findViewById(R.id.editTextIp);
+
+        sharedPref = getSharedPreferences("iot-shared-pref", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("selected-ip", "127.0.0.1");
+        editor.putString("selected-port", "8080");
+        editor.commit();
+
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        //
+        Log.i(TAG, "onResume invoked.");
+        String selectedIp = sharedPref.getString("selected-ip", null);
+        String selectedPort = sharedPref.getString("selected-port", null);
+        Log.i(TAG, "Selected device: " + selectedIp + ":" + selectedPort);
+        editTextIp.setText(selectedIp);
+        editTextPort.setText(selectedPort);
     }
 
     @Override
@@ -99,35 +122,53 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    public void updateIp (String ip)
-    {
-        dynamic_ip = ip;
-
-        this.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                // This code will always run on the UI thread, therefore is safe to modify UI elements.
-
-                if (!editTextIp.getText().toString().equals(dynamic_ip)) {
-                    editTextIp.setText(dynamic_ip);
-                }
-            }
-        });
-    }
-
-    public void updatePort (String port)
-    {
-        dynamic_port = port;
-
-        this.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                // This code will always run on the UI thread, therefore is safe to modify UI elements.
-
-                if (!editTextPort.getText().toString().equals(dynamic_port)) {
-                    editTextPort.setText(dynamic_port);
-                }
-            }
-        });
-    }
+//    public void updateIp (String ip)
+//    {
+//        dynamic_ip = ip;
+//
+//        this.runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//                // This code will always run on the UI thread, therefore is safe to modify UI elements.
+//
+//                if (!editTextIp.getText().toString().equals(dynamic_ip)) {
+//                    editTextIp.setText(dynamic_ip);
+//                }
+//            }
+//        });
+//    }
+//
+//    public void updatePort (String port)
+//    {
+//        dynamic_port = port;
+//
+//        this.runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//                // This code will always run on the UI thread, therefore is safe to modify UI elements.
+//
+//                if (!editTextPort.getText().toString().equals(dynamic_port)) {
+//                    editTextPort.setText(dynamic_port);
+//                }
+//            }
+//        });
+//    }
+//
+//    public void updateIpV2 (String ip)
+//    {
+//        dynamic_ip = ip;
+//        Log.i (TAG, "Updating ip: " + dynamic_ip);
+//        if (!editTextIp.getText().toString().equals(dynamic_ip)) {
+//            editTextIp.setText(dynamic_ip);
+//        }
+//    }
+//
+//    public void updatePortV2 (String port)
+//    {
+//        dynamic_port = port;
+//        Log.i (TAG, "Updating port: " + dynamic_port);
+//        if (!editTextPort.getText().toString().equals(dynamic_port)) {
+//            editTextPort.setText(dynamic_port);
+//        }
+//    }
 }
