@@ -18,10 +18,22 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp" />
 
+    <SeekBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/discoverTimeoutSlider"
+        android:layout_below="@+id/refreshbutton"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="16dp"
+        android:layout_alignEnd="@+id/discoverdeviceslist" />
+
+
+
     <ListView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/refreshbutton"
+        android:layout_below="@+id/discoverTimeoutSlider"
+        android:layout_marginTop="16dp"
         android:id="@+id/discoverdeviceslist"></ListView>
 
 </RelativeLayout>

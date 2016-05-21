@@ -11,6 +11,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import org.json.JSONException;
@@ -42,6 +43,8 @@ public class DiscoverActivity extends AppCompatActivity {
     Set<String> discoveredMachinesSet = new LinkedHashSet<>();
     ArrayAdapter<String> adapter;
     SharedPreferences sharedPref;
+    private static final int TIMEOUT_MS = 250;
+    private int dynamic_timeout_ms;
 
     private void sendDiscoverRequest(DatagramSocket socket) throws IOException {
         String data = String.format("discover");
@@ -147,28 +150,22 @@ public class DiscoverActivity extends AppCompatActivity {
                     discoveredMachinesList.add(ip.toString() + ":" + port.toString());
                     discoveredMachinesSet.add(ip.toString() + ":" + port.toString());
                 }
-                //discoveredMachinesList.add(ip.toString() + ":" + port.toString());
-                //discoveredMachinesSet.add(ip.toString() + ":" + port.toString());
-
-                //String[] hosts = s.split(":");
-                //String[] host1params = hosts[0].split(":");
-
-                //String[] port = hosts[1].split("/");
-
-                //Log.d(TAG, "IP: " + hosts[0]);
-                //Log.d(TAG, "Port: " + port[0]);
-                //f2.updateIp(hosts[0]);
-                //f2.updatePort(port[0]);
-                // break;
             }
         } catch (SocketTimeoutException e) {
             Log.d(TAG, "Receive timed out");
         }
 
-        // discoveredMachines = discoveredMachinesSet.toArray();
-        adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, android.R.id.text1, discoveredMachinesList);
-        updateDevicesList();
+        if (discoveredMachinesList.isEmpty()) {
+            Log.d(TAG, "Running discover again...");
+            new MyTask().execute();
+        }
+        else {
+            Log.d(TAG, "Finite devices discovered. Not running discover.");
+            adapter = new ArrayAdapter<String>(this,
+                    android.R.layout.simple_list_item_1, android.R.id.text1, discoveredMachinesList);
+            updateDevicesList();
+        }
+
     }
 
     @Override
@@ -200,28 +197,47 @@ public class DiscoverActivity extends AppCompatActivity {
                 // ListView Clicked item value
                 String  itemValue    = (String) dicoverDevicesList.getItemAtPosition(position);
 
-                Log.d (TAG, "Setting main activity ip and port");
                 // Show Alert
                 Toast.makeText(getApplicationContext(),
-                        "Position: " + itemPosition + "  ListItem: " + itemValue , Toast.LENGTH_LONG)
+                        "Position: " + itemPosition + "  ListItem: " + itemValue , Toast.LENGTH_SHORT)
                         .show();
 
-                // MainActivity mainActivity = (MainActivity) getParent();
                 String[] selectedHost = itemValue.split(":");
-                 //mainActivity.updateIpV2(selectedHost[0]);
-                 //mainActivity.updatePortV2(selectedHost[1]);
                 Log.d (TAG, "Setting main activity ip and port");
-                //MainActivity.editTextIp.setText(selectedHost[0]);
-               // MainActivity.editTextPort.setText(selectedHost[1]);
 
                 sharedPref = getSharedPreferences("iot-shared-pref", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPref.edit();
                 editor.putString("selected-ip", selectedHost[0]);
                 editor.putString("selected-port", selectedHost[1]);
                 editor.commit();
+                finish();
             }
 
         });
+
+        SeekBar seekBar = (SeekBar) findViewById(R.id.discoverTimeoutSlider);
+        seekBar.setMax(2000);
+        seekBar.setProgress(TIMEOUT_MS);
+        dynamic_timeout_ms = TIMEOUT_MS;
+
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progresValue, boolean fromUser) {
+                Log.v("Progress=", "" + progresValue);
+                dynamic_timeout_ms = progresValue;
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
+
+        new MyTask().execute();
     }
 
     public class MyTask extends AsyncTask<Boolean, Integer, Boolean> {
@@ -232,7 +248,7 @@ public class DiscoverActivity extends AppCompatActivity {
             try {
                 DatagramSocket discoverSocket = new DatagramSocket();
                 discoverSocket.setBroadcast(true);
-                discoverSocket.setSoTimeout(5000);
+                discoverSocket.setSoTimeout(dynamic_timeout_ms);
 
                 sendDiscoverRequest (discoverSocket);
                 listenForResponses(discoverSocket);

@@ -211,56 +211,6 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-//    public void updateIp (String ip)
-//    {
-//        dynamic_ip = ip;
-//
-//        this.runOnUiThread(new Runnable() {
-//            @Override
-//            public void run() {
-//                // This code will always run on the UI thread, therefore is safe to modify UI elements.
-//
-//                if (!editTextIp.getText().toString().equals(dynamic_ip)) {
-//                    editTextIp.setText(dynamic_ip);
-//                }
-//            }
-//        });
-//    }
-//
-//    public void updatePort (String port)
-//    {
-//        dynamic_port = port;
-//
-//        this.runOnUiThread(new Runnable() {
-//            @Override
-//            public void run() {
-//                // This code will always run on the UI thread, therefore is safe to modify UI elements.
-//
-//                if (!editTextPort.getText().toString().equals(dynamic_port)) {
-//                    editTextPort.setText(dynamic_port);
-//                }
-//            }
-//        });
-//    }
-//
-//    public void updateIpV2 (String ip)
-//    {
-//        dynamic_ip = ip;
-//        Log.i (TAG, "Updating ip: " + dynamic_ip);
-//        if (!editTextIp.getText().toString().equals(dynamic_ip)) {
-//            editTextIp.setText(dynamic_ip);
-//        }
-//    }
-//
-//    public void updatePortV2 (String port)
-//    {
-//        dynamic_port = port;
-//        Log.i (TAG, "Updating port: " + dynamic_port);
-//        if (!editTextPort.getText().toString().equals(dynamic_port)) {
-//            editTextPort.setText(dynamic_port);
-//        }
-//    }
-
     public class MyTask extends AsyncTask<Boolean, Integer, Boolean> {
 
         @Override
@@ -270,8 +220,6 @@ public class MainActivity extends AppCompatActivity
                 DatagramSocket socket = new DatagramSocket();
                 //socket.setBroadcast(true);
                 socket.setSoTimeout(TIMEOUT_MS);
-
-
 
                 if (isSwitchChecked)
                 {
