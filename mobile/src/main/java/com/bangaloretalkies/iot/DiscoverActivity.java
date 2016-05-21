@@ -23,8 +23,13 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class DiscoverActivity extends AppCompatActivity {
     private static final String TAG = "DiscoverActivity";
@@ -32,6 +37,8 @@ public class DiscoverActivity extends AppCompatActivity {
     private ListView dicoverDevicesList;
     String[] discoveredMachines;
     List<String> discoveredMachinesList = new ArrayList<String>();
+    Set<String> discoveredMachinesSet = new LinkedHashSet<>();
+    ArrayAdapter<String> adapter;
 
     private void sendDiscoverRequest(DatagramSocket socket) throws IOException {
         String data = String.format("discover");
@@ -57,6 +64,12 @@ public class DiscoverActivity extends AppCompatActivity {
         return null;
     }
 
+    public boolean isIPValid(String text) {
+        Pattern p = Pattern.compile("^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$");
+        Matcher m = p.matcher(text);
+        return m.find();
+    }
+
     private void listenForResponses(DatagramSocket socket) throws IOException {
         byte[] buf = new byte[1024];
         try {
@@ -73,6 +86,20 @@ public class DiscoverActivity extends AppCompatActivity {
                 catch (JSONException e) {
                    //  e.printStackTrace();
                     Log.d(TAG, "Received response not JSON: " + e + ", Rejecting it.");
+
+                    String[] hosts = s.split(":");
+
+                    String[] port = hosts[1].split("/");
+
+                    Log.d(TAG, "IP: " + hosts[0]);
+                    Log.d(TAG, "Port: " + port[0]);
+                    //if (isIPValid(hosts[0].toString())) {
+                        Log.i (TAG, "Valid ip address.");
+                        if (!discoveredMachinesSet.contains( hosts[0].toString() + ":" +  port[0].toString())) {
+                            discoveredMachinesList.add(hosts[0].toString() + ":" + port[0].toString());
+                            discoveredMachinesSet.add(hosts[0].toString() + ":" + port[0].toString());
+                        }
+                    //}
                     continue;
                 }
 
@@ -113,7 +140,12 @@ public class DiscoverActivity extends AppCompatActivity {
                 Log.i(TAG, "ip: " + ip.toString());
                 Log.i(TAG, "port: " + port.toString());
 
-                discoveredMachinesList.add(ip.toString() + ":" + port.toString());
+                if (!discoveredMachinesSet.contains(ip.toString() + ":" + port.toString())) {
+                    discoveredMachinesList.add(ip.toString() + ":" + port.toString());
+                    discoveredMachinesSet.add(ip.toString() + ":" + port.toString());
+                }
+                //discoveredMachinesList.add(ip.toString() + ":" + port.toString());
+                //discoveredMachinesSet.add(ip.toString() + ":" + port.toString());
 
                 //String[] hosts = s.split(":");
                 //String[] host1params = hosts[0].split(":");
@@ -129,6 +161,11 @@ public class DiscoverActivity extends AppCompatActivity {
         } catch (SocketTimeoutException e) {
             Log.d(TAG, "Receive timed out");
         }
+
+        // discoveredMachines = discoveredMachinesSet.toArray();
+        adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_1, android.R.id.text1, discoveredMachinesList);
+        updateDevicesList();
     }
 
     @Override
@@ -162,7 +199,7 @@ public class DiscoverActivity extends AppCompatActivity {
 
                 // Show Alert
                 Toast.makeText(getApplicationContext(),
-                        "Position :"+itemPosition+"  ListItem : " +itemValue , Toast.LENGTH_LONG)
+                        "Position: " + itemPosition + "  ListItem: " + itemValue , Toast.LENGTH_LONG)
                         .show();
 
             }
@@ -191,21 +228,20 @@ public class DiscoverActivity extends AppCompatActivity {
         }
     }
 
-    public void updateDevicesList (String port)
+    public void updateDevicesList ()
     {
         // dynamic_port = port;
 
         this.runOnUiThread(new Runnable() {
+
             @Override
             public void run() {
                 // This code will always run on the UI thread, therefore is safe to modify UI elements.
 
-//                ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-//                        android.R.layout.simple_list_item_1, android.R.id.text1, discoveredMachinesList);
 
 
                 // Assign adapter to ListView
-                // dicoverDevicesList.setAdapter(adapter);
+                dicoverDevicesList.setAdapter(adapter);
 
 //                if (!editTextPort.getText().toString().equals(dynamic_port)) {
 //                    editTextPort.setText(dynamic_port);
